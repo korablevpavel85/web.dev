@@ -54,22 +54,46 @@ const findAuthorsImage = (key) => {
 };
 
 /**
+ * @param {!Author} author to update
+ * @param {!Array<*>} allAuthorPosts posts including drafts
+ * @return {boolean} whether this author is allowed here
+ */
+const maybeUpdateAuthorHref = (author, allAuthorPosts) => {
+  if (author.elements.length !== 0) {
+    return true;
+  }
+
+  if (author.twitter) {
+    author.href = `https://twitter.com/${author.twitter}`;
+    return true;
+  }
+
+  // If the author has scheduled or draft posts, don't complain.
+  if (allAuthorPosts.length !== 0) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
  * Returns all authors with their posts.
  *
  * @param {any} collections Eleventy collection object
  * @return {Object.<string, Author>}
  */
 module.exports = (collections) => {
-  // Get all posts and sort them
-  const posts = collections
+  // Find all posts, sort and key by author. Don't yet filter to live posts.
+  const allPosts = collections
     .getFilteredByGlob('**/*.md')
-    .filter(livePosts)
     .sort((a, b) => b.date - a.date);
-
-  const authorsPosts = findAuthorsPosts(posts);
+  const authorsPosts = findAuthorsPosts(allPosts);
 
   /** @constant @type {Object.<string, Author>} @default */
   const authors = {};
+
+  /** @type {!Array<string>} */
+  const invalidAuthors = [];
 
   Object.values(contributors)
     .sort((a, b) => a.title.localeCompare(b.title))
@@ -81,34 +105,16 @@ module.exports = (collections) => {
         subhead: author.description,
       };
 
-      author.elements = authorsPosts.has(author.key)
-        ? authorsPosts.get(author.key)
-        : [];
+      // Get all authors but filter later.
+      const allAuthorPosts = authorsPosts.get(author.key) || [];
+      author.elements = allAuthorPosts.filter(livePosts);
 
-      // If the author doesn't have any posts, use their Twitter profile.
-      if (author.elements.length === 0) {
-        if (!author.twitter) {
-          // If we're screenshot testing just ignore it.
-          if (process.env.PERCY) {
-            return;
-          }
-
-          // posts.length might be empty (it's _all_ posts) if we're generating
-          // partials so only throw if we're doing a regular build.
-          const isRegularBuild = Boolean(posts.length);
-          if (isRegularBuild) {
-            console.warn(
-              `author ${
-                author.title
-              } has no posts and no social: ${JSON.stringify(author)}\n`,
-            );
-            throw new Error(
-              `author ${author.title} needs posts or social information`,
-            );
-          }
-        } else {
-          author.href = `https://twitter.com/${author.twitter}`;
-        }
+      // Update the author's href to be their Twitter profile, if they have no
+      // live posts on the site.
+      if (!maybeUpdateAuthorHref(author, allAuthorPosts)) {
+        // If they have no Twitter profile or posts (even draft ones), the
+        // author probably shouldn't be here.
+        invalidAuthors.push(author.key);
       }
 
       const authorsImage = findAuthorsImage(author.key);
@@ -123,6 +129,14 @@ module.exports = (collections) => {
 
       authors[author.key] = author;
     });
+
+  // Only complain that authors are invalid if we've got any posts *at all*
+  // (we can do weird Eleventy builds with no posts, don't complain here).
+  const isRegularBuild = Boolean(allPosts.length);
+  if (isRegularBuild && invalidAuthors.length) {
+    const s = invalidAuthors.join(',');
+    throw new Error(`authors [${s}] have no posts and/or Twitter information`);
+  }
 
   return authors;
 };
