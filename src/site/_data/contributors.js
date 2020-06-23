@@ -132,6 +132,7 @@ const contributors = {
       unit: 'Chrome',
     },
     country: 'US',
+    twitter: 'shane_exterkamp',
     github: 'exterkamp',
     description: {
       en: 'Shane is a SWE on Lighthouse',

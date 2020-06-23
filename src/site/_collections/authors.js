@@ -93,15 +93,17 @@ module.exports = (collections) => {
             return;
           }
 
-          // posts.length might be empty if we're generating partials so only
-          // log a warning if it has a value and we're doing a regular build.
-          // Note this is checking for _all_ posts and not just the posts
-          // by this specific author.
-          if (posts.length) {
+          // posts.length might be empty (it's _all_ posts) if we're generating
+          // partials so only throw if we're doing a regular build.
+          const isRegularBuild = Boolean(posts.length);
+          if (isRegularBuild) {
             console.warn(
               `author ${
                 author.title
               } has no posts and no social: ${JSON.stringify(author)}\n`,
+            );
+            throw new Error(
+              `author ${author.title} needs posts or social information`,
             );
           }
         } else {
