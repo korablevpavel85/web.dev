@@ -1,5 +1,5 @@
 ---
-title: "The Native File System API: Simplifying access to local files"
+title: "The Native File System API: simplifying access to local files"
 subhead: The new Native File System API allows web apps to read or save changes directly to files and folders on the user's device.
 authors:
   - petelepage
