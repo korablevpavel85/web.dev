@@ -6,6 +6,7 @@ subhead: |
   with the Payment Request API.
 authors:
   - agektmr
+  - mihajlija
 date: 2020-05-25
 description: |
   Learn how merchants integrate payment apps, how payment transactions work with
