@@ -1341,6 +1341,17 @@ const contributors = {
       name: 'Google',
     },
   },
+  sahel: {
+    name: {
+      given: 'Sahel',
+      family: 'Sharify',
+    },
+    github: 'sahel-sh',
+    country: 'CA',
+    org: {
+      name: 'Google',
+    },
+  },
 };
 
 const processedContributors = {};
