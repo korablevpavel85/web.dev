@@ -15,10 +15,19 @@ module.exports = {
         'life-of-a-payment-transaction',
         'setting-up-a-payment-method',
       ],
-    },
-    {
-      title: 'Build a native payment app',
-      pathItems: ['android-payment-apps-overview'],
+      subtopics: [
+        {
+          title: 'Build a native payment app',
+          pathItems: [
+            'android-payment-apps-overview',
+            'android-payment-apps-delegation',
+          ],
+        },
+        {
+          title: 'Build a web-based payment app',
+          pathItems: [],
+        },
+      ],
     },
   ],
 };
